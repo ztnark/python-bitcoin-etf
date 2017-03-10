@@ -59,9 +59,11 @@ def checkETF(url, config, fromEmailPW):
 
     threading.Timer(15, checkETF,[url, config, fromEmailPW]).start()
     data = urllib2.urlopen(url).read(20000) #number of chars that should catch the announcement
-    eachWord = data.split()
+    
+    #Use lower case by default
+    eachWord = data.lower().split()
 
-    if 'Bitcoin' in eachWord:
+    if 'bitcoin' in eachWord:
         text= 'Bitcoin has been detected on ' + url
         print text
 
@@ -73,7 +75,7 @@ def checkETF(url, config, fromEmailPW):
                 
         os._exit(0)
     else:
-        print 'no mention of bitcoin has been found yet'
+        print 'No mention of bitcoin has been found yet'
 
 main()
 
