@@ -10,6 +10,7 @@ from email.utils import formataddr
 import requests
 import smtplib
 import urllib
+import re
 
 def main():
     if len(sys.argv)!=2:
@@ -22,9 +23,8 @@ def main():
     Config = ConfigParser.ConfigParser()
     Config.read('Config.ini')
 
-    url='https://www.sec.gov/rules/sro/batsbzx.htm'
-
-    checkETF(url, Config, fromEmailPW)
+    checkETF('https://www.sec.gov/rules/sro/batsbzx.htm', Config, fromEmailPW)
+    checkFTP('https://www.sec.gov/rules/sro/batsbzx/2017/?C=M;O=A', Config, fromEmailPW)
 
 def sendEmail(emailtext,fromEmail,fromEmailPW,toEmail):
     msg = MIMEMultipart('alternative')
@@ -55,6 +55,16 @@ def sendSMS(accountSid, authToken, text, fromSMS, toSMS):
     else :
         print 'Successfully sent the SMS'
 
+def notify(config, url, fromEmailPW):
+    text= 'Bitcoin has been detected on ' + url
+    print text
+
+    if config.get('Preferences', 'Email') == 'true':
+        sendEmail(text, config.get('Emails','From'), fromEmailPW, config.get('Emails','To'))
+    if config.get('Preferences', 'SMS') == 'true':
+        sendSMS(config.get('Twilio', 'AccountSid'), config.get('Twilio', 'AuthToken'),
+            text, config.get('SMS','From'), config.get('SMS','To'))
+
 def checkETF(url, config, fromEmailPW):
 
     threading.Timer(15, checkETF,[url, config, fromEmailPW]).start()
@@ -64,18 +74,28 @@ def checkETF(url, config, fromEmailPW):
     eachWord = data.lower().split()
 
     if 'bitcoin' in eachWord:
-        text= 'Bitcoin has been detected on ' + url
-        print text
-
-        if config.get('Preferences', 'Email') == 'true':
-            sendEmail(text, config.get('Emails','From'), fromEmailPW, config.get('Emails','To'))
-        if config.get('Preferences', 'SMS') == 'true':
-            sendSMS(config.get('Twilio', 'AccountSid'), config.get('Twilio', 'AuthToken'),
-                text, config.get('SMS','From'), config.get('SMS','To'))
+        notify(config, url, fromEmailPW)
                 
         os._exit(0)
     else:
-        print 'No mention of bitcoin has been found yet'
+        print 'No mention of bitcoin has been found yet on ' + url
+
+def checkFTP(url, config, fromEmailPW):
+
+    threading.Timer(15, checkFTP,[url, config, fromEmailPW]).start()
+    data = urllib2.urlopen(url).read(20000) #number of chars that should catch the announcement
+    
+    #Use lower case by default
+    words = data.lower().split()
+
+    #Check for any new documetns during the ten days after March 10th 2017
+    matches = [string for string in words if re.match('1.-mar-2017', string)]
+    if matches:
+        notify(config, url, fromEmailPW)
+                
+        os._exit(0)
+    else:
+        print 'No mention of bitcoin has been found yet on ' + url
 
 main()
 
