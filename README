@@ -1,15 +1,9 @@
 Description
-A very simple python script that checks two SEC website for updates on the Bitcoin ETF. One is their main public facing website. The other is an ftp server they expose for unknown reasons. The times of historical release have not been aligned, this is why checking both is a good idea.
-
-Tired of pressing "F5" all day waiting for an update from the SEC before March 11th 2017? This simple script will automate that process for you and tell whether or not there has been an update on the Bitcoin ETF, plus you'll be emailed.
+A very simple python script that checks the price of Bitcoin and alerts the user via text if the price changes by more than $100 in either direction. 
 
 Run
 Step 1:  Downloand and install Python.     
 Step 2:  Install any missing dependencies.
-Step 3:  (Optional) Create a Twilio account and get an AccountCid and AuthToken.
+Step 3:  Create a Twilio account and get an AccountCid and AuthToken.
 Step 3:  Create a new Config.ini file using Config.sample.ini. Place this in your base directory.
-Step 4:  run as: python etf.py <from email password> 
-
-Debug
-
-You will get an error if your email account doen't allow for apps like this to access it, for gmail turn this on (and then off after), at "Less secure apps" section https://www.google.com/settings/security/lesssecureapps
+Step 4:  run as: python etf.py
