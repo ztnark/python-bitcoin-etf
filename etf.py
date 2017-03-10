@@ -2,6 +2,7 @@ import urllib2
 import threading
 import os
 import sys
+import ConfigParser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
@@ -9,15 +10,17 @@ from email.utils import formataddr
 import smtplib
 
 def main():
-    if len(sys.argv)!=4:
-        print "please include the arguments: fromEmail,fromEmailPW,toEmail."
+    if len(sys.argv)!=2:
+        print "please include the arguments: fromEmailPassword."
         sys.exit()
 
+    Config = ConfigParser.ConfigParser()
+    Config.read("Config.ini")
+    print Config.options('Emails')
+
     url="https://www.sec.gov/rules/sro/batsbzx.htm"
-    fromEmail=sys.argv[1]
-    fromEmailPW=sys.argv[2]
-    toEmail=sys.argv[3]
-    checkETF(url,fromEmail,fromEmailPW,toEmail)
+    fromEmailPW=sys.argv[1]
+    checkETF(url, Config.get('Emails','From'), fromEmailPW, Config.get('Emails', 'To'))
 
 def sendEmail(emailtext,fromEmail,fromEmailPW,toEmail):
     msg = MIMEMultipart('alternative')
